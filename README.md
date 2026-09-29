@@ -4,7 +4,7 @@ Calculadora responsiva, em português e reais, para estimar custos e recomendar 
 
 ## Recursos
 
-- Cera, essência, conversão entre peso e volume e perdas de insumos.
+- Cera e essência exclusivamente em gramas, com perdas de insumos.
 - Potes, pavios, rótulos, embalagem e frete de insumos.
 - Trabalho e energia calculados por lote.
 - Despesas fixas rateadas, taxas, impostos, comissões e frete por pedido.
