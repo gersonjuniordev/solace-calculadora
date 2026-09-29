@@ -1,21 +1,18 @@
 /* All monetary calculations use unrounded values; only the recommended price rounds up. */
 (function(root){
-const defaults={batch:12,waxPrice:45,waxPack:1000,waxUnit:'g',waxUse:150,oilPrice:35,oilPack:100,oilUnit:'g',oilUse:12,oilUseUnit:'g',density:0.9,loss:5,jar:5.5,wick:0.8,label:0.6,box:2,extra:0,inbound:0,laborMinutes:90,hourly:25,watts:500,energyMinutes:45,kwh:1.11,batchExtra:0,fixedMonthly:200,monthlyUnits:100,fee:5,tax:0,commission:0,orderFee:0,shipping:0,orderUnits:1,margin:30,rounding:'0.5',customPrice:45,discount:10};
+const defaults={batch:12,waxPrice:45,waxPack:1000,waxUse:150,oilPrice:35,oilPack:100,oilUse:12,loss:5,jar:5.5,wick:0.8,label:0.6,box:2,extra:0,inbound:0,laborMinutes:90,hourly:25,watts:500,energyMinutes:45,kwh:1.11,batchExtra:0,fixedMonthly:200,monthlyUnits:100,fee:5,tax:0,commission:0,orderFee:0,shipping:0,orderUnits:1,margin:30,rounding:'0.5',customPrice:45,discount:10};
 const numeric=Object.keys(defaults).filter(k=>typeof defaults[k]==='number');
 function parse(v){if(typeof v==='number')return Number.isFinite(v)?v:NaN;const s=String(v).trim().replace(/\s/g,'');if(!s)return NaN;if(!/^(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d+)?$/.test(s)&&!/^\d+(?:\.\d+)?$/.test(s))return NaN;return Number(s.includes(',')?s.replace(/\./g,'').replace(',','.'):s);}
-function calculate(raw){const d={...raw},errors={};if(d.oilUnit===d.oilUseUnit)d.density=1;for(const k of numeric){d[k]=parse(d[k]);if(!Number.isFinite(d[k])||d[k]<0||d[k]>1e9)errors[k]='Informe um número válido, entre 0 e 1 bilhão.';}
+function calculate(raw){const d={...raw},errors={};for(const k of numeric){d[k]=parse(d[k]);if(!Number.isFinite(d[k])||d[k]<0||d[k]>1e9)errors[k]='Informe um número válido, entre 0 e 1 bilhão.';}
 for(const k of ['batch','waxPack','oilPack','orderUnits','monthlyUnits'])if(!(d[k]>0))errors[k]='Informe um valor maior que zero.';
 for(const k of ['batch','orderUnits','monthlyUnits'])if(!Number.isInteger(d[k]))errors[k]='Informe uma quantidade inteira.';
 for(const k of ['loss','margin','discount'])if(d[k]>=100)errors[k]='Use um percentual menor que 100%.';
 for(const k of ['fee','tax','commission'])if(d[k]>100)errors[k]='Use um percentual entre 0 e 100%.';
-if(!['g','kg'].includes(d.waxUnit))errors.waxPack='Selecione uma unidade de cera válida.';
-if(!['g','ml'].includes(d.oilUnit)||!['g','ml'].includes(d.oilUseUnit))errors.oilPack='Selecione uma unidade de essência válida.';
-if(d.oilUnit!==d.oilUseUnit&&!(d.density>0))errors.density='A conversão exige densidade maior que zero.';
 const rate=(d.fee+d.tax+d.commission)/100;
 if(rate+d.margin/100>=1)errors.margin='Margem + taxas + impostos + comissão precisam somar menos de 100%.';
 if(Object.keys(errors).length)return {errors};
-const wax=d.waxPrice/(d.waxPack*(d.waxUnit==='kg'?1000:1))*d.waxUse;
-const oilQty=d.oilUnit===d.oilUseUnit?d.oilUse:d.oilUseUnit==='g'?d.oilUse/d.density:d.oilUse*d.density;
+const wax=d.waxPrice/d.waxPack*d.waxUse;
+const oilQty=d.oilUse;
 const oil=d.oilPrice/d.oilPack*oilQty;
 const waste=(wax+oil)/(1-d.loss/100)-(wax+oil);
 const packaging=d.jar+d.wick+d.label+d.box+d.extra;
